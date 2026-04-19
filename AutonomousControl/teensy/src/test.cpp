@@ -53,10 +53,10 @@ void setup() {
   delay(2000);
 
   pins p;
-  pinMode(13, OUTPUT);
-  pinMode(14, OUTPUT);
-  pinMode(15, OUTPUT);
-  pinMode(16, OUTPUT);
+  pinMode(20, OUTPUT);
+  pinMode(21, OUTPUT);
+  pinMode(22, OUTPUT);
+  pinMode(23, OUTPUT);
 
   pinMode(p.PWM1, OUTPUT);
   pinMode(p.PWM2, OUTPUT);
