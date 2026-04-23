@@ -22,6 +22,7 @@ value = 27 # Trained Model
 
 last_trigger = [0,0]
 cooldown = 1.5
+detected = [False, False]
 
 
 class Grid:
@@ -136,9 +137,9 @@ def weed_detection():
 
     #Global Variables
     global last_cell_detected, time_detected
-
+    global detected
    
-    face_model = YOLO(f"runs/detect/train{value}/weights/best.pt")
+    weed_model = YOLO(f"runs/detect/train{value}/weights/best.pt")
 
     cv2.namedWindow("AGRIS", cv2.WINDOW_NORMAL)
 
@@ -179,7 +180,7 @@ def weed_detection():
         overlay = frame.copy()
 
         small_frame = cv2.resize(frame, (320, 320))
-        current_results = face_model(small_frame, conf=0.5, verbose=False)
+        current_results = weed_model(small_frame, conf=0.5, verbose=False)
         #current_results = face_model(frame, conf=.50, verbose = False)
         cv2.rectangle(frame, (445,0), (640,110), (100, 100, 100), -1)
         cv2.addWeighted(overlay, alpha, frame, 1 - alpha, 0, frame)
@@ -230,7 +231,7 @@ def weed_detection():
                     grid_system = (
                         bounding_y > cell.y1_axis and cell.x1_axis < bounding_x < cell.x2_axis
                     )
-                    if grid_system:
+                    if grid_system and not detected[i]:
                         if current_time - last_trigger[i] > cooldown:
                             last_trigger[i] = current_time
                             last_cell_detected = label
@@ -239,10 +240,10 @@ def weed_detection():
                             save_to_file(x1,y1, label)
                             #arduinoSignal(ser, signal)
                             print(f"Weed detected at {label}, moving AFS 5 feet forward..., and signal {signal}")
-                     
+                    detected[i] = grid_system
 
                 class_id = int(box.cls[0]) #Class id to use with the class_name 
-                class_name = face_model.names[class_id]
+                class_name = weed_model.names[class_id]
                 label = f'{class_name}, {confidence}, {x1}, {y1}' # THis is the label that is above the bounding box
 
                 cv2.rectangle(frame, (x1,y1), (x2,y2), (0,100,0), 2) #This creates our own custom bounding box, using this instead of .plot
